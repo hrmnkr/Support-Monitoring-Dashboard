@@ -1,0 +1,426 @@
+﻿@model List<IssueDashboard.Models.Issue>
+
+<div class="container-fluid px-4">
+
+    <h2 class="mb-4">Support Monitoring Dashboard</h2>
+    
+    <div class="row">
+
+        <div class="col-md-3">
+            <div class="card text-white bg-primary mb-3">
+                <div class="card-body">
+                    <h5>Total Issues</h5>
+                    <h2>@ViewBag.TotalIssues</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-body">
+                    <h5>Mail Issues</h5>
+                    <h2>@ViewBag.MailIssues</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-white bg-warning mb-3">
+                <div class="card-body">
+                    <h5>WebSupport Issues</h5>
+                    <h2>@ViewBag.WebSupportIssues</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-white bg-danger mb-3">
+                <div class="card-body">
+                    <h5>WhatsApp Issues</h5>
+                    <h2>@ViewBag.WhatsAppIssues</h2>
+                </div>
+            </div>
+        </div>
+        @*
+        NOTE:
+        "Today's Issues" is disabled because current system uses static Excel data.
+        Since data is not auto-updated in real-time, this KPI may show incorrect values.
+        Will be enabled once auto-refresh / dynamic data source is implemented.
+
+        <div class="col-md-3">
+            <div class="card text-white bg-dark mb-3">
+                <div class="card-body">
+                    <h5>Today's Issues</h5>
+                    <h2>@ViewBag.TodayIssues</h2>
+                </div>
+            </div>
+        </div>
+        *@
+
+        @* Note add these but why the other one not added .........check
+            
+        <div class="col-md-3">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-body">
+                    <h5>Resolved Issues</h5>
+                    <h2>@ViewBag.ResolvedCount</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-white bg-danger mb-3">
+                <div class="card-body">
+                    <h5>Pending Issues</h5>
+                    <h2>@ViewBag.PendingCount</h2>
+                </div>
+            </div>
+        </div>
+        *@
+        
+    </div>
+
+    <form method="get" class="row mb-4">
+
+        @*
+        NOTE:
+        "All sources " dropdown is disabled because current system uses static Excel data.
+        *@
+
+        <div class="col-md-3">
+            <select name="sourceFilter" class="form-control">
+                <option value="">All Sources</option>
+                @foreach (var s in ViewBag.SourceList)
+                {
+                    <option value="@s">@s</option>
+                }
+            </select>
+        </div>
+        
+        @*<div class="col-md-6">
+
+            <a href="/" class="btn btn-outline-dark">All</a>
+
+            <a href="/?sourceFilter=Mail" class="btn btn-outline-primary">Mail</a>
+
+            <a href="/?sourceFilter=WebSupport" class="btn btn-outline-warning">WebSupport</a>
+
+            <a href="/?sourceFilter=WhatsApp" class="btn btn-outline-success">WhatsApp</a>
+
+        </div>
+        *@
+
+        <div class="col-md-3">
+            <select name="reporterFilter" class="form-control">
+                <option value="">All Reporters</option>
+                @foreach (var r in ViewBag.ReporterList)
+                {
+                    <option value="@r">@r</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </div>
+
+    </form>
+
+    <div class="row">
+
+        <!-- Issues by Source -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5>Issues by Source</h5>
+                    <canvas id="sourceChart" style="height:250px;"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top 5 Reporters -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5>Top 5 Reporters</h5>
+                    <canvas id="reporterChart" style="height:250px;"></canvas>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h4>Daily Issue Trend</h4>
+            <canvas id="trendChart" style="height:300px;"></canvas>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+
+            <h4>All Issues</h4>
+
+            <input type="text" id="searchBox" class="form-control mb-3" placeholder="Search...">
+
+            <table class="table table-bordered table-striped">
+
+                <thead>
+                    <tr>
+                        <th>SrNo</th>
+                        <th>Source</th>
+                        <th>Date</th>
+                        <th>Reporter</th>
+                        <th>Issue</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.SrNo</td>
+                            <td>@item.Source</td>
+                            <td>@item.Date.ToShortDateString()</td>
+                            <td>@item.ReportedBy</td>
+                            @*<td>
+                                <span class="copy-text text-primary" style="cursor:pointer"
+                                      data-value="@item.ReportedBy">
+                                    @item.CleanReporter
+                                </span>
+                            </td>*@
+                            <td>@item.IssueText</td>
+                            <td>
+                                @if (item.Status == "Resolved")
+                                {
+                                    <span class="badge bg-success">Resolved</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark">@item.Status</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+            <div class="d-flex justify-content-between align-items-center mt-3">
+
+                <!-- LEFT: Showing results -->
+                <div>
+                    <small class="text-muted">
+                        @ViewBag.StartRecord - @ViewBag.EndRecord of @ViewBag.TotalRecords results
+                    </small>
+                </div>
+
+                <!-- CENTER: Pagination -->
+                <div class="d-flex align-items-center">
+
+                    <!-- Previous -->
+                    @if (ViewBag.HasPrevious)
+                    {
+                        <a href="?page=@(ViewBag.CurrentPage - 1)&pageSize=@ViewBag.PageSize&sourceFilter=@Context.Request.Query["sourceFilter"]&reporterFilter=@Context.Request.Query["reporterFilter"]"
+                           class="btn btn-sm btn-light me-2">
+                            &lt;
+                        </a>
+                    }
+
+                    <!-- Page Info -->
+                    <span class="me-2">
+                        Page <strong>@ViewBag.CurrentPage</strong> of @ViewBag.TotalPages
+                    </span>
+
+                    <!-- Next -->
+                    @if (ViewBag.HasNext)
+                    {
+                        <a href="?page=@(ViewBag.CurrentPage + 1)&pageSize=@ViewBag.PageSize&sourceFilter=@Context.Request.Query["sourceFilter"]&reporterFilter=@Context.Request.Query["reporterFilter"]"
+                           class="btn btn-sm btn-light ms-2">
+                            &gt;
+                        </a>
+                    }
+
+                </div>
+
+                <!-- RIGHT: Page Size -->
+                <div>
+                    <form method="get">
+                        <label class="me-2">Show</label>
+                        <select name="pageSize" onchange="this.form.submit()" class="form-select form-select-sm d-inline w-auto">
+                            <option value="10" selected="@(ViewBag.PageSize == 10 ? "selected" : null)">10</option>
+                            <option value="25" selected="@(ViewBag.PageSize == 25 ? "selected" : null)">25</option>
+                            <option value="50" selected="@(ViewBag.PageSize == 50 ? "selected" : null)">50</option>
+                        </select>
+                        <span class="ms-1">per page</span>
+
+                        <!-- Keep filters -->
+                        <input type="hidden" name="sourceFilter" value="@Context.Request.Query["sourceFilter"]" />
+                        <input type="hidden" name="reporterFilter" value="@Context.Request.Query["reporterFilter"]" />
+                    </form>
+                </div>
+
+            </div>
+
+            
+
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    canvas {
+    max-height: 280px;
+    }
+</style>
+<style>
+    .btn-light {
+    border: 1px solid #ddd;
+    background-color: #f8f9fa;
+    }
+</style>
+
+@*<script>
+    document.querySelectorAll(".copy-text").forEach(el => {
+    el.addEventListener("click", function () {
+    const text = this.getAttribute("data-value");
+
+    navigator.clipboard.writeText(text);
+
+    showToast("Copied!");
+    });
+    });
+
+    function showToast(msg) {
+        let toast = document.getElementById("copyToast");
+
+        if (!toast) {
+            toast = document.createElement("div");
+            toast.id = "copyToast";
+            toast.style.position = "fixed";
+            toast.style.top = "20px";
+            toast.style.right = "20px";
+            toast.style.background = "#28a745";
+            toast.style.color = "white";
+            toast.style.padding = "10px 20px";
+            toast.style.borderRadius = "5px";
+            document.body.appendChild(toast);
+        }
+
+        toast.innerText = msg;
+        toast.style.display = "block";
+
+        setTimeout(() => {
+        toast.style.display = "none";
+        }, 2000);
+    }
+</script>*@
+
+<script>
+
+    var labels = [];
+    var counts = [];
+
+    @foreach (var s in ViewBag.SourceData)
+    {
+        <text>
+            labels.push("@s.Source");
+            counts.push(@s.Count);
+        </text>
+    }
+
+    new Chart(document.getElementById("sourceChart"), {
+    type: 'pie',
+    data: {
+    labels: labels,
+    datasets: [{
+    data: counts
+    }]
+    },
+    options: {
+    responsive: true,
+    maintainAspectRatio: false
+    }
+    });
+
+    var reporterLabels = [];
+    var reporterCounts = [];
+
+    @foreach (var r in ViewBag.ReporterData)
+    {
+        <text>
+            reporterLabels.push("@r.Reporter");
+            reporterCounts.push(@r.Count);
+        </text>
+    }
+
+    new Chart(document.getElementById("reporterChart"), {
+    type: 'bar',
+    data: {
+    labels: reporterLabels,
+    datasets: [{
+    label: 'Issues by Reporter',
+    data: reporterCounts
+    }]
+    },
+    options: {
+    responsive: true,
+    maintainAspectRatio: false
+    }
+    });
+
+    document.getElementById("searchBox").addEventListener("keyup", function() {
+
+    var value = this.value.toLowerCase();
+    var rows = document.querySelectorAll("tbody tr");
+
+    rows.forEach(function(row) {
+
+    row.style.display =
+    row.innerText.toLowerCase().includes(value) ? "" : "none";
+
+    });
+
+    });
+
+    var trendLabels = [];
+    var trendCounts = [];
+
+    @foreach (var t in ViewBag.TrendData)
+    {
+        <text>
+            trendLabels.push("@t.Date");
+            trendCounts.push(@t.Count);
+        </text>
+    }
+
+    new Chart(document.getElementById("trendChart"), {
+    type: 'line',
+    data: {
+    labels: trendLabels,
+    datasets: [{
+    label: 'Issues per Day',
+    data: trendCounts,
+    fill: false,
+    tension: 0.1
+    }]
+    },
+    options: {
+    responsive: true,
+    maintainAspectRatio: false
+    }
+    });
+
+</script>
+
+<script>
+    setTimeout(function () {
+    location.reload();
+    }, 30000); // refresh every 30 seconds
+</script>
