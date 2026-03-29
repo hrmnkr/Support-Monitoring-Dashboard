@@ -2,44 +2,52 @@
 
 <div class="container-fluid px-4">
 
-    <h2 class="mb-4">Support Monitoring Dashboard</h2>
+    <h2 class="mb-4">Issues Dashboard</h2>
     
     <div class="row">
 
         <div class="col-md-3">
-            <div class="card text-white bg-primary mb-3">
-                <div class="card-body">
-                    <h5>Total Issues</h5>
-                    <h2>@ViewBag.TotalIssues</h2>
+            <a href="/Home/Index" style="text-decoration:none;">
+                <div class="card text-white bg-primary mb-3">
+                    <div class="card-body">
+                        <h5>Total Issues</h5>
+                        <h2>@ViewBag.TotalIssues</h2>
+                    </div>
                 </div>
-            </div>
+            </a>
         </div>
 
         <div class="col-md-3">
-            <div class="card text-white bg-success mb-3">
-                <div class="card-body">
-                    <h5>Mail Issues</h5>
-                    <h2>@ViewBag.MailIssues</h2>
+            <a href="/Home/Index?sourceFilter=Mail" style="text-decoration:none;">
+                <div class="card text-white bg-success mb-3">
+                    <div class="card-body">
+                        <h5>Mail Issues</h5>
+                        <h2>@ViewBag.MailIssues</h2>
+                    </div>
                 </div>
-            </div>
+            </a>
         </div>
 
         <div class="col-md-3">
-            <div class="card text-white bg-warning mb-3">
-                <div class="card-body">
-                    <h5>WebSupport Issues</h5>
-                    <h2>@ViewBag.WebSupportIssues</h2>
+            <a href="/Home/Index?sourceFilter=WebSupport" style="text-decoration:none;">
+                <div class="card text-white bg-warning mb-3">
+                    <div class="card-body">
+                        <h5>WebSupport Issues</h5>
+                        <h2>@ViewBag.WebSupportIssues</h2>
+                    </div>
                 </div>
-            </div>
+            </a>
         </div>
 
         <div class="col-md-3">
-            <div class="card text-white bg-danger mb-3">
-                <div class="card-body">
-                    <h5>WhatsApp Issues</h5>
-                    <h2>@ViewBag.WhatsAppIssues</h2>
+            <a href="/Home/Index?sourceFilter=WhatsApp" style="text-decoration:none;">
+                <div class="card text-white bg-danger mb-3">
+                    <div class="card-body">
+                        <h5>WhatsApp Issues</h5>
+                        <h2>@ViewBag.WhatsAppIssues</h2>
+                    </div>
                 </div>
-            </div>
+            </a>
         </div>
         @*
         NOTE:
