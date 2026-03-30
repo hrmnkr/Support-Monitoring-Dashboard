@@ -1,0 +1,186 @@
+﻿@model List<IssueDashboard.Models.Review>
+
+<div class="container-fluid px-4">
+
+    <h2 class="mb-4">Reviews Dashboard</h2>
+
+    <!-- KPI CARDS -->
+    <div class="row">
+
+        <div class="col-md-2">
+            <a href="/Reviews/Index" style="text-decoration:none;">
+                <div class="card text-white bg-primary mb-3">
+                    <div class="card-body">
+                        <h5>Total Reviews</h5>
+                        <h2>@ViewBag.TotalReviews</h2>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-2">
+            <a href="/Reviews/Index?platformFilter=Android" style="text-decoration:none;">
+                <div class="card text-white bg-success mb-3">
+                    <div class="card-body">
+                        <h5>Android Reviews</h5>
+                        <h2>@ViewBag.AndroidReviews</h2>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-2">
+            <a href="/Reviews/Index?platformFilter=iOS" style="text-decoration:none;">
+                <div class="card text-white bg-dark mb-3">
+                    <div class="card-body">
+                        <h5>iOS Reviews</h5>
+                        <h2>@ViewBag.IOSReviews</h2>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-info text-white mb-3">
+                <div class="card-body">
+                    <h6>Replied</h6>
+                    <h3>@ViewBag.Replied</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark mb-3">
+                <div class="card-body">
+                    <h6>Pending Reply</h6>
+                    <h3>@ViewBag.Pending</h3>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- CHARTS -->
+    <div class="row">
+
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5>Platform Distribution</h5>
+                    <canvas id="platformChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5>Review Trend</h5>
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- TABLE -->
+    <div class="card">
+        <div class="card-body">
+
+            <h4>All Reviews</h4>
+
+            <table class="table table-bordered table-striped">
+
+                <thead>
+                    <tr>
+                        <th>SrNo</th>
+                        <th>Date</th>
+                        <th>Platform</th>
+                        <th>User</th>
+                        <th>Device</th>
+                        <th>Review</th>
+                        <th>Reply</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.SrNo</td>
+                            <td>@item.ReviewDate.ToShortDateString()</td>
+                            <td>@item.Platform</td>
+                            <td>@item.UserName</td>
+                            <td>@item.DeviceName</td>
+                            <td>@item.ReviewText</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(item.ReplyText))
+                                {
+                                    <span class="badge bg-success">Replied</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">Pending</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+
+            </table>
+
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+    // PLATFORM CHART
+    var pLabels = [];
+    var pCounts = [];
+
+    @foreach (var p in ViewBag.PlatformData)
+    {
+        <text>
+            pLabels.push("@p.Platform");
+            pCounts.push(@p.Count);
+        </text>
+    }
+
+    new Chart(document.getElementById("platformChart"), {
+    type: 'pie',
+    data: {
+    labels: pLabels,
+    datasets: [{ data: pCounts }]
+    }
+    });
+
+    // TREND CHART
+    var tLabels = [];
+    var tCounts = [];
+
+    @foreach (var t in ViewBag.TrendData)
+    {
+        <text>
+            tLabels.push("@t.Date");
+            tCounts.push(@t.Count);
+        </text>
+    }
+
+    new Chart(document.getElementById("trendChart"), {
+    type: 'line',
+    data: {
+    labels: tLabels,
+    datasets: [{
+    label: "Reviews",
+    data: tCounts,
+    fill: false,
+    tension: 0.1
+    }]
+    }
+    });
+
+</script>
