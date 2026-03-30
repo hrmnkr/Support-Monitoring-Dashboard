@@ -24,19 +24,52 @@ namespace IssueDashboard.Services
                     if (string.IsNullOrWhiteSpace(sheet.Cells[row, 1].Text))
                         continue;
 
+                    string rawSource = sheet.Cells[row, 1].Text?.Trim().ToLower();
+
+                    // Normalize source
+                    string normalizedSource = "";
+
+                    if (!string.IsNullOrEmpty(rawSource))
+                    {
+                        if (rawSource.Contains("mail") || rawSource.Contains("email"))
+                            normalizedSource = "Mail";
+                        else if (rawSource.Contains("web"))
+                            normalizedSource = "WebSupport";
+                        else if (rawSource.Contains("whatsapp") || rawSource.Contains("whtasapp"))
+                            normalizedSource = "WhatsApp";
+                        else
+                            normalizedSource = rawSource; // fallback (optional)
+                    }
+
                     // Safe SrNo parsing
                     int srNo = 0;
                     int.TryParse(sheet.Cells[row, 2].Text, out srNo);
 
                     //Safe Date parsing
                     DateTime dateValue;
-                    DateTime.TryParseExact(
-                        sheet.Cells[row, 3].Text,
-                        "dd-MM-yyyy",
-                        System.Globalization.CultureInfo.InvariantCulture,
-                        System.Globalization.DateTimeStyles.None,
+
+                    // Try multiple formats + fallback
+                    var rawDate = sheet.Cells[row, 3].Text?.Trim();
+
+                    bool isValidDate = DateTime.TryParseExact(
+                        rawDate,
+                        new[] { "dd-MM-yyyy", "dd/MM/yyyy", "MM/dd/yyyy" },
+                        CultureInfo.InvariantCulture,
+                        DateTimeStyles.None,
                         out dateValue
                     );
+
+                    // Fallback: general parse (for Excel date formats)
+                    if (!isValidDate)
+                    {
+                        DateTime.TryParse(rawDate, out dateValue);
+                    }
+                    if (dateValue == DateTime.MinValue)
+                    {
+                        Console.WriteLine($"Invalid date at row {row}: {rawDate}");
+                        continue;
+                    }
+
                     string rawReporter = sheet.Cells[row, 4].Text;
                     string cleanReporter = rawReporter;
 
@@ -54,7 +87,7 @@ namespace IssueDashboard.Services
                     issues.Add(new Issue
                     {
                         SrNo = srNo,
-                        Source = sheet.Cells[row, 1].Text,
+                        Source = normalizedSource,
                         Date = dateValue,
                         CleanReporter = cleanReporter,
                         ReportedBy = rawReporter,
